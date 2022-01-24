@@ -1,5 +1,13 @@
 <?php
-
+/*
+|--------------------------------------------------------------------------
+| LoadSupplierProducts Command
+|--------------------------------------------------------------------------
+| This class:
+| - contains default path for the CSC file &
+| - calls the FileParser
+|
+*/
 namespace App\Console\Commands;
 
 use App\Services\CsvFileParser;

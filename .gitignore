@@ -2,7 +2,11 @@
 
 
 # PROJECT SPECIFIC DIRECTORIES/FILES:
-
+#/framework
+#storage/logs
+#/app/public
+#storage/app/.gitignore
+#storage/app/file_parsing/input_files/*.csv
 
 # DEFAULTS
  # (come with fresh installation (duplicates with the rest are removed) )
