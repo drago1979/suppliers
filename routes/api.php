@@ -34,6 +34,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('suppliers', [App\Http\Controllers\Api\SupplierController::class, 'index']);
 Route::patch('suppliers/{supplier}', [App\Http\Controllers\Api\SupplierController::class, 'update']);
 Route::delete('suppliers/{supplier}', [App\Http\Controllers\Api\SupplierController::class, 'destroy']);
+Route::get('suppliers/{supplier}/download_supplier_parts_csv', [App\Http\Controllers\Api\SupplierController::class, 'downloadCsv']);
+
 
 
 // Parts
