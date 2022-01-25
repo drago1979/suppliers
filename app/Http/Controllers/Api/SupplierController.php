@@ -15,16 +15,16 @@ class SupplierController extends Controller
 
     public function index(Request $request)
     {
-        $list = Supplier::all();
+        $suppliers = Supplier::all();
 
-        return new SupplierResourceCollection($list);
+        return new SupplierResourceCollection($suppliers);
     }
 
     public function update(Supplier $supplier)
     {
          $supplier->update([
-            'name' => request()->get('name'),
-            'priority' => request()->get('priority')
+            'name' => request()->input('name'),
+            'priority' => request()->input('priority')
         ]);
 
         return new SupplierResource($supplier->fresh());
