@@ -14,6 +14,25 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+/*
+|--------------------------------------------------------------------------
+| Default Routes
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+/*
+|--------------------------------------------------------------------------
+| Custom  Routes
+|--------------------------------------------------------------------------
+*/
+
+// Suppliers
+Route::get('suppliers', [App\Http\Controllers\Api\SupplierController::class, 'index']);
+Route::patch('suppliers/{supplier}', [App\Http\Controllers\Api\SupplierController::class, 'update']);
+Route::delete('suppliers/{supplier}', [App\Http\Controllers\Api\SupplierController::class, 'destroy']);
+
+

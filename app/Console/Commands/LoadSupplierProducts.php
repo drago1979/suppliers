@@ -8,6 +8,7 @@
 | - calls the FileParser
 |
 */
+
 namespace App\Console\Commands;
 
 use App\Services\CsvFileParser;
@@ -56,11 +57,8 @@ class LoadSupplierProducts extends Command
         );
 
         // We ask the user to choose between default and custom path
-        if ($this->confirm("### Do you want to use default path for input file ?\n\n ### Default path is:\n" . $filePath)) {
-            //
-        } else {
+        $this->confirm("### Do you want to use default path for input file ?\n\n ### Default path is:\n" . $filePath) ? :
             $filePath = $this->ask('### Please enter custom path.');
-        }
 
         $fileParser->parseFile($filePath);
 
