@@ -1,13 +1,14 @@
 <?php
 /*
 |--------------------------------------------------------------------------
-| CSV File Parser
+| CSV File Parser - transforms CSV file (suppliers & products)
 |--------------------------------------------------------------------------
 | This class:
 | - Is called by "loadsupplierproducts" artisan command
 | - Parses CSV files
 | - Prepares CSV content to be stored in DB (
 |   adds column names to values)
+| - Removes invalid rows
 | - Calls the class in charge for storing products & suppliers to DB
 |
 */
@@ -26,7 +27,7 @@ class CsvFileParser
         if (($csvContent = fopen($filePath, 'r')) !== FALSE) {
             $row = 0;
             $columnNames = [];
-            $products = [];
+            $productsWithoutNames = [];
 
             while (($csvLine = fgetcsv($csvContent, 250, ",")) !== FALSE) {
 
@@ -38,38 +39,54 @@ class CsvFileParser
                     continue;
                 }
 
-                // Add each CSV line to $products starting with 2nd line (without column names)
-                $products[] = $csvLine;
+                // Add each CSV line to $productsWithoutNames starting with 2nd line (without column names)
+                $productsWithoutNames[] = $csvLine;
             }
 
             fclose($csvContent);
         }
 
-        $this->addNamesToFields($columnNames, $products);
+        $this->addNamesToFields($columnNames, $productsWithoutNames);
     }
 
     /**
      * @param $columnNames
      * @param $products
      */
-    public function addNamesToFields($columnNames, $products)
+    public function addNamesToFields($columnNames, $productsWithoutNames)
     {
-        $results = [];
+        $products = [];
 
-        foreach ($products as $product) {
-            $result = [];
+        foreach ($productsWithoutNames as $productWithoutNames) {
+            $product = [];
 
-            foreach ($product as $index => $productAttribute) {
+            foreach ($productWithoutNames as $index => $productAttribute) {
                 $columnName = $columnNames[$index];
 
-                $result[$columnName] = $productAttribute;
+                $product[$columnName] = $productAttribute;
             }
 
-            $results[] = $result;
+            $products[] = $product;
         }
 
-        $loadProducts = new LoadProducts();
+        $this->removeInvalidProducts($products);
+    }
 
-        $loadProducts->storeProducts($results);
+    /**
+     * @param $productsToCheck
+     */
+    public function removeInvalidProducts($productsToCheck)
+    {
+        // Remove the product without: supplier_name & part_number & condition
+        foreach ($productsToCheck as $key => $productToCheck) {
+            if ($productToCheck['supplier_name'] === "" || $productToCheck['part_number'] === "" || $productToCheck['condition'] === "") {
+                unset($productsToCheck[$key]);
+            }
+        }
+
+        $products = array_values($productsToCheck);
+
+        $productsLoader = new ProductsLoader();
+        $productsLoader->store($products);
     }
 }
