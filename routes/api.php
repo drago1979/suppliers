@@ -36,3 +36,7 @@ Route::patch('suppliers/{supplier}', [App\Http\Controllers\Api\SupplierControlle
 Route::delete('suppliers/{supplier}', [App\Http\Controllers\Api\SupplierController::class, 'destroy']);
 
 
+// Parts
+Route::get('parts', [App\Http\Controllers\Api\PartController::class, 'index']);
+Route::patch('parts/{part}', [App\Http\Controllers\Api\PartController::class, 'update']);
+Route::delete('parts/{part}', [App\Http\Controllers\Api\PartController::class, 'destroy']);

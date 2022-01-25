@@ -32,8 +32,10 @@ class SupplierController extends Controller
 
     public function destroy(Supplier $supplier)
     {
+        $supplierName = $supplier->name;
+
         $supplier->delete();
 
-        return $this->respond('Supplier is deleted');
+        return $this->respond('Supplier --' . $supplierName . '-- is deleted');
     }
 }
