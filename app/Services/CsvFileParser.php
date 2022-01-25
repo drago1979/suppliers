@@ -6,10 +6,10 @@
 | This class:
 | - Is called by "loadsupplierproducts" artisan command
 | - Parses CSV files
-| - Prepares CSV content to be stored in DB (
-|   adds column names to values)
+| - Adds column names to values
 | - Removes invalid rows
-| - Calls the class in charge for storing products & suppliers to DB
+| - Harmonizes value types
+| - Calls the class which stores products & suppliers to DB
 |
 */
 
@@ -85,6 +85,24 @@ class CsvFileParser
         }
 
         $products = array_values($productsToCheck);
+
+        $this->harmonizeValueTypes($products);
+    }
+
+    public function harmonizeValueTypes($productsToHarmonize)
+    {
+        $products = [];
+
+        // DB doesn`t take empty string ("") for float data type; We change it to NULL
+        foreach ($productsToHarmonize as $productToHarmonize) {
+            $product = $productToHarmonize;
+
+            if ($product['price'] === "") {
+                $product['price'] = null;
+            }
+
+            $products[] = $product;
+        }
 
         $productsLoader = new ProductsLoader();
         $productsLoader->store($products);
