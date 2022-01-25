@@ -16,36 +16,16 @@ use Illuminate\Console\Command;
 
 class LoadSupplierProducts extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'loadsupplierproducts';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Loads suppliers and their products from CSV file';
 
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
+
     public function __construct()
     {
         parent::__construct();
     }
 
-    /**
-     * Execute the console command.
-     *
-     * @param CsvFileParser $fileParser
-     * @return int
-     */
     public function handle(CsvFileParser $fileParser)
     {
         // Default path where the file should be stored

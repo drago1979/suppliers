@@ -13,7 +13,7 @@ class SupplierController extends Controller
 {
     use ApiResponseTrait;
 
-    public function index(Request $request)
+    public function index()
     {
         $suppliers = Supplier::all();
 

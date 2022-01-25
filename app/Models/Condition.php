@@ -13,10 +13,6 @@ class Condition extends Model
 
 
     // Relationships
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
     public function parts()
     {
         return $this->hasMany(Part::class);

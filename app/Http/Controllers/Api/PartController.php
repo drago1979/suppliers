@@ -15,7 +15,36 @@ class PartController extends Controller
 
     public function index()
     {
-        $parts = Part::all();
+        /*
+         * #########             #########
+         *           VARIJANTA 1:
+         *
+         * - Zadovoljava zahtev dobijen u zadatku
+         * - URL query format: ?supplier_id=1
+         * - Ograniceno na jednog supplier-a
+        */
+
+//        $supplierId = request()->input('supplier_id');
+//
+//        if(!empty($supplierId)){
+//            $parts = Part::where('supplier_id', $supplierId)->get();
+//        } else {
+//            $parts = Part::all();
+//        }
+
+        /*
+         * #########             #########
+         *           VARIJANTA 2:
+         *
+         * - Zadovoljava zahtev dobijen u zadatku
+         * - URL query format: ?supplier_id[]=1 (&supplier_id[]=2 .... itd)
+         * - Omogucava filtriranje po vise supplier-a
+         * - Omogucava uvodjenje dodatnih filtera izmenom
+         *   koda u Part\scopeFilterSupplierId()
+         *
+        */
+        $parts = Part::filterSupplierId(request()->input('supplier_id'))
+            ->get();
 
         return new PartResourceCollection($parts);
     }
