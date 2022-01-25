@@ -54,9 +54,14 @@ class SupplierController extends Controller
 
         $handle = fopen($filePath, 'w');
 
-        $supplier->parts()->chunk(100, function ($users) use ($handle) {
-            foreach ($users as $row) {
-                fputcsv($handle, $row->toArray(), ';');
+        // Write column names to CSV
+        $columnNames = array_keys($supplier->parts()->first()->attributesToArray());
+        fputcsv($handle, $columnNames);
+
+        // Write parts information to CSV
+        $supplier->parts()->chunk(100, function ($supplierParts) use ($handle) {
+            foreach ($supplierParts as $row) {
+                fputcsv($handle, $row->toArray());
             }
         });
 
@@ -67,19 +72,25 @@ class SupplierController extends Controller
 
     public function createDirectoryAndFilePath($supplier)
     {
-        $directoryPath = 'app' . DIRECTORY_SEPARATOR .
+        $fileName = $supplier->id . '.csv';
+        $directoryPath = storage_path(
+            'app' . DIRECTORY_SEPARATOR .
             'file_parsing' . DIRECTORY_SEPARATOR .
-            'download_files';
+            'download_files'
+        );
+        $filePath = $directoryPath . DIRECTORY_SEPARATOR . $fileName;
 
-        $fileName = $supplier->id;
+        // If there is a file with the same name - delete it
+        if (file_exists($filePath)) {
+            File::delete($filePath);
+        }
 
         // Create a folder if it does not exist
-        if (!file_exists(storage_path($directoryPath))) {
-
-            File::makeDirectory(storage_path($directoryPath), 0766, true);
+        if (!file_exists($directoryPath)) {
+            File::makeDirectory($directoryPath, 0766, true);
         }
 
         // Return full $filePath
-        return storage_path($directoryPath . DIRECTORY_SEPARATOR . $fileName);
+        return $filePath;
     }
 }
