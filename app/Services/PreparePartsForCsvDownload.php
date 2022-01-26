@@ -6,7 +6,7 @@
 | This class:
 | - Retrieves single supplier parts from DB
 | - Creates directory and file path
-| - Creates & stores CSC file
+| - Creates & stores CSV file
 |
 */
 
@@ -26,27 +26,8 @@ class PreparePartsForCsvDownload
 
         $handle = fopen($filePath, 'w');
 
-        // Get first DB record and use it for CSV file column names
-        $columnNamesRaw = Part::query()
-            ->select([
-                'suppliers.name AS supplier_name',
-                'parts.part_number',
-                'parts.part_description',
-                'parts.quantity',
-                'parts.price',
-                'conditions.name AS condition',
-                'categories.name AS category',
-            ])
-            ->join('suppliers', function ($query) use ($supplierId) {
-                $query->on('parts.supplier_id', '=', 'suppliers.id')
-                    ->on('suppliers.id', '=', DB::raw($supplierId));
-            })
-            ->join('conditions', 'parts.condition_id', '=', 'conditions.id')
-            ->leftJoin('categories', 'parts.category_id', '=', 'categories.id')
-            ->first();
-
-        // Write column names to CSV file
-        $columnNames = array_keys($columnNamesRaw->attributesToArray());
+        // Create column names list & write them to CSV file
+        $columnNames = ['supplier_name', 'part_number', 'part_description', 'quantity', 'price', 'condition', 'category'];
         fputcsv($handle, $columnNames);
 
         // Write parts information to CSV file
@@ -82,6 +63,7 @@ class PreparePartsForCsvDownload
     {
         $fileName = $this->createFileName($supplierId);
 
+        // Create Directory Path & File Path
         $directoryPath = storage_path(
             'app' . DIRECTORY_SEPARATOR .
             'file_parsing' . DIRECTORY_SEPARATOR .
@@ -109,9 +91,7 @@ class PreparePartsForCsvDownload
 
         $timeStamp = Carbon::now()->format('Y_m_d-H_i_s');
 
-        $fileName = $supplierName . '_' . $timeStamp . '.csv';
-
-        return $fileName;
+        return $supplierName . '_' . $timeStamp . '.csv';
     }
 
 }

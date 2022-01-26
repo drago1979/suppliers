@@ -12,6 +12,9 @@ class SupplierController extends Controller
 {
     use ApiResponseTrait;
 
+    /**
+     * @return SupplierResourceCollection
+     */
     public function index()
     {
         $suppliers = Supplier::all();

@@ -19,31 +19,23 @@ namespace App\Services;
 class CsvFileParser
 {
 
-    public function parseFile($filePath)
+    public function parse($csvContent)
     {
-        if (($csvContent = fopen($filePath, 'r')) !== FALSE) {
-            $row = 0;
-            $columnNames = [];
-            $productsWithoutNames = [];
+        $products = [];
 
-            while (($csvLine = fgetcsv($csvContent, 250, ",")) !== FALSE) {
-
-                // Extract CSV file column names and put them into $columnNames;
-                if ($row === 0) {
-                    $columnNames = $csvLine;
-                    $row++;
-
-                    continue;
-                }
-
-                // Add each CSV line to $productsWithoutNames starting with 2nd line (without column names)
-                $productsWithoutNames[] = $csvLine;
-            }
-
-            fclose($csvContent);
+        while (($csvLine = fgetcsv($csvContent, 250, ",")) !== FALSE) {
+            $products[] = $csvLine;
         }
 
-        $this->addNamesToFields($columnNames, $productsWithoutNames);
+        $columnNames = array_shift($products);
+
+        fclose($csvContent);
+
+        $products = $this->addNamesToFields($columnNames, $products);
+        $products = $this->removeInvalidProducts($products);
+        $products = $this->harmonizeValueTypes($products);
+
+        return $products;
     }
 
     // Add names (keys) to suppliers` and products` attributes
@@ -63,7 +55,7 @@ class CsvFileParser
             $products[] = $product;
         }
 
-        $this->removeInvalidProducts($products);
+        return $products;
     }
 
     // Remove the product without: supplier_name & part_number & condition
@@ -77,7 +69,7 @@ class CsvFileParser
 
         $products = array_values($productsToCheck);
 
-        $this->harmonizeValueTypes($products);
+        return $products;
     }
 
     // DB doesn`t take empty string ("") for float data type; We change it to NULL
@@ -95,7 +87,6 @@ class CsvFileParser
             $products[] = $product;
         }
 
-        $productsLoader = new ProductsLoader();
-        $productsLoader->store($products);
+        return $products;
     }
 }

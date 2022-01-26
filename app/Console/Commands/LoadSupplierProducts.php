@@ -4,7 +4,7 @@
 | LoadSupplierProducts Command
 |--------------------------------------------------------------------------
 | This class:
-| - contains default path for the CSC file &
+| - contains default path for the CSV file &
 | - calls the FileParser
 |
 */
@@ -12,6 +12,7 @@
 namespace App\Console\Commands;
 
 use App\Services\CsvFileParser;
+use App\Services\ProductsLoader;
 use Illuminate\Console\Command;
 
 class LoadSupplierProducts extends Command
@@ -20,13 +21,7 @@ class LoadSupplierProducts extends Command
 
     protected $description = 'Loads suppliers and their products from CSV file';
 
-
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    public function handle(CsvFileParser $fileParser)
+    public function handle(CsvFileParser $fileParser, ProductsLoader $productsLoader)
     {
         // Default path where the file should be stored
         $filePath = storage_path(
@@ -37,12 +32,18 @@ class LoadSupplierProducts extends Command
         );
 
         // We ask the user to choose between default and custom path
-        $this->confirm("### Do you want to use default path for input file ?\n\n ### Default path is:\n" . $filePath) ? :
+        $this->confirm("### Do you want to use default path for input file ?\n\n ### Default path is:\n" . $filePath, true) ?:
             $filePath = $this->ask('### Please enter custom path.');
 
-        $fileParser->parseFile($filePath);
+        if (($csvContent = fopen($filePath, 'r')) !== FALSE) {
+            $products = $fileParser->parse($csvContent);
 
-        $this->info("\n### Command is executed.\nPlease check for results.");
+            $productsLoader->store($products);
+
+            $this->info("\n### Command is executed.\nPlease check for results.");
+        } else {
+            $this->info("\n### No such path or a file.\nPlease check.");
+        }
 
     }
 }

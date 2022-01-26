@@ -7,12 +7,14 @@ use App\Http\Resources\Api\PartResource;
 use App\Http\Resources\Api\PartResourceCollection;
 use App\Models\Part;
 use App\Traits\Api\ApiResponseTrait;
-use Illuminate\Http\Request;
 
 class PartController extends Controller
 {
     use ApiResponseTrait;
 
+    /**
+     * @return PartResourceCollection
+     */
     public function index()
     {
         /*
@@ -24,13 +26,13 @@ class PartController extends Controller
          * - Ograniceno na jednog supplier-a
         */
 
-//        $supplierId = request()->input('supplier_id');
-//
-//        if(!empty($supplierId)){
-//            $parts = Part::where('supplier_id', $supplierId)->get();
-//        } else {
-//            $parts = Part::all();
-//        }
+                //        $supplierId = request()->input('supplier_id');
+                //
+                //        if(!empty($supplierId)){
+                //            $parts = Part::where('supplier_id', $supplierId)->get();
+                //        } else {
+                //            $parts = Part::all();
+                //        }
 
         /*
          * #########             #########
@@ -47,11 +49,6 @@ class PartController extends Controller
             ->get();
 
         return new PartResourceCollection($parts);
-    }
-
-    public function show(Part $part)
-    {
-        return new PartResource($part);
     }
 
     public function update(Part $part)
