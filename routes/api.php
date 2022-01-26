@@ -41,4 +41,4 @@ Route::patch('parts/{part}', [App\Http\Controllers\Api\PartController::class, 'u
 Route::delete('parts/{part}', [App\Http\Controllers\Api\PartController::class, 'destroy']);
 
 // CSV file download
-Route::get('download_supplier_parts_csv/{supplier_id}', [App\Http\Controllers\Api\DownloadCsvController::class, 'downloadCsv']);
+Route::get('download_supplier_parts_csv/{supplier_id}', [App\Http\Controllers\Api\DownloadCsvController::class, 'download']);

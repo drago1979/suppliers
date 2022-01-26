@@ -1,13 +1,20 @@
 <?php
-
+/*
+|--------------------------------------------------------------------------
+| PreparePartsForCsvDownload:
+|--------------------------------------------------------------------------
+| This class:
+| - Retrieves single supplier parts from DB
+| - Creates directory and file path
+| - Creates & stores CSC file
+|
+*/
 
 namespace App\Services;
-
 
 use App\Models\Part;
 use App\Models\Supplier;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
@@ -18,6 +25,29 @@ class PreparePartsForCsvDownload
         $filePath = $this->createDirectoryAndFilePath($supplierId);
 
         $handle = fopen($filePath, 'w');
+
+        // Get first DB record and use it for CSV file column names
+        $columnNamesRaw = Part::query()
+            ->select([
+                'suppliers.name AS supplier_name',
+                'parts.part_number',
+                'parts.part_description',
+                'parts.quantity',
+                'parts.price',
+                'conditions.name AS condition',
+                'categories.name AS category',
+            ])
+            ->join('suppliers', function ($query) use ($supplierId) {
+                $query->on('parts.supplier_id', '=', 'suppliers.id')
+                    ->on('suppliers.id', '=', DB::raw($supplierId));
+            })
+            ->join('conditions', 'parts.condition_id', '=', 'conditions.id')
+            ->leftJoin('categories', 'parts.category_id', '=', 'categories.id')
+            ->first();
+
+        // Write column names to CSV file
+        $columnNames = array_keys($columnNamesRaw->attributesToArray());
+        fputcsv($handle, $columnNames);
 
         // Write parts information to CSV file
         Part::query()
@@ -38,19 +68,12 @@ class PreparePartsForCsvDownload
             ->leftJoin('categories', 'parts.category_id', '=', 'categories.id')
             ->chunk(100, function ($supplierParts) use ($handle) {
 
-                // Write column names to CSV file
-                $columnNames = array_keys($supplierParts[0]->attributesToArray());
-                fputcsv($handle, $columnNames);
-
                 foreach ($supplierParts as $row) {
                     fputcsv($handle, $row->toArray());
                 }
             });
 
         fclose($handle);
-
-//        dd('done');
-//        dd($filePath);
 
         return $filePath;
     }
@@ -76,10 +99,6 @@ class PreparePartsForCsvDownload
             File::makeDirectory($directoryPath, 0766, true);
         }
 
-        // Return full $filePath
-
-//        dd($filePath);
-
         return $filePath;
     }
 
@@ -88,14 +107,11 @@ class PreparePartsForCsvDownload
         // Get suppliers` name; replace non characters with underscores
         $supplierName = preg_replace('/[^a-zA-Z0-9]+/', '_', Supplier::find($supplierId)->name);
 
-        $timeStamp = Carbon::now()->format('Y_m_d-H_m_s');
+        $timeStamp = Carbon::now()->format('Y_m_d-H_i_s');
 
-        $filePath = $supplierName . '_' . $timeStamp . '.csv';
+        $fileName = $supplierName . '_' . $timeStamp . '.csv';
 
-        Cache::forget($timeStamp);
-
-        var_dump($filePath);
-        dd();
-        return $filePath;
+        return $fileName;
     }
+
 }
