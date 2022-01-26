@@ -16,106 +16,62 @@ class Part extends Model
         'quantity', 'price'
     ];
 
-    public function getPartsForCsvDownloadFile($supplierId)
-    {
-        // # Get supplier parts (collection) from DB
-        $suppliersPartsRaw = Part::where('supplier_id', $supplierId)->get();
-
-        // # Define which attributes are to be: removed, renamed+values changed
-        $attributesToRemove = ['id', 'supplier_id'];
-
-        $attributesToRenameAndChangeValues = [ // Works if attributes base model has: "id" & "name" attributes
-            'condition_id' => 'condition',
-            'category_id' => 'category'
-        ];
-
-        // Create usable list of attributes to be changed
-        $attributesToRenameList = [];
-        foreach ($attributesToRenameAndChangeValues as $attribute) {
-            $attributesToRenameList[$attribute] = $this->getList($attribute);
-        }
-
-        $suppliersPartsRaw->transform(function (Part $part, $key) use ($attributesToRemove, $attributesToRenameAndChangeValues, $attributesToRenameList) {
-            $attributes = $part->getAttributes();
-
-            // Remove unwanted attributes
-            $attributes = array_diff_key($attributes, array_flip($attributesToRemove));
-//            dd($attributes);
-
-            // Insert new fields with textual values and remove old
-            foreach ($attributesToRenameAndChangeValues as $key => $value) {
-                $attributes[$value] = $attributesToRenameList[$value][$attributes[$key]];
-                unset($attributes[$key]);
-            }
-
-            dd($attributes);
-
-
-            // Rename attributes
-
-
-        });
-
-
-//        $suppliersParts->transform(function (Part $part, $key) use ($attributesToRemove, $attributesToRenameAndConvertValues, $conditionList, $categoryList) {
+//    public function getPartsForCsvDownloadFile($supplierId)
+//    {
+//        // Get supplier parts (collection) from DB
+//        return Part::where('supplier_id', $supplierId)->get();
+//
+//        // Define which attributes are to be: removed, renamed+values changed;
+//        // Attributes to remove: Works if attributes base model has: "id" & "name" attributes
+//        $attributesToRemove = ['id', 'supplier_id'];
+//        $attributesToRenameAndChangeValues = [
+//            'condition_id' => 'condition',
+//            'category_id' => 'category'
+//        ];
+//
+//        // Create usable list of attributes to be changed
+//        $attributesToRenameList = [];
+//        foreach ($attributesToRenameAndChangeValues as $attribute) {
+//            $attributesToRenameList[$attribute] = $this->getList($attribute);
+//        }
+//
+//        $suppliersParts->transform(function (Part $part, $key) use ($attributesToRemove, $attributesToRenameAndChangeValues, $attributesToRenameList) {
 //            $attributes = $part->getAttributes();
 //
 //            // Remove unwanted attributes
 //            $attributes = array_diff_key($attributes, array_flip($attributesToRemove));
-////            dd($attributes);
 //
 //            // Insert new fields with textual values and remove old
-//            foreach ($attributesToRenameAndConvertValues as $key => $value) {
-//                $attributes[$value] = $conditionList[$attributes[$key]];
+//            foreach ($attributesToRenameAndChangeValues as $key => $value) {
+//                $attributes[$value] = $attributesToRenameList[$value][$attributes[$key]];
 //                unset($attributes[$key]);
 //            }
 //
-////            $attributes['condition'] = $conditionList[$attributes['condition_id']];
-////            unset($attributes['condition_id']);
-////
-////            $attributes['category'] = $categoryList[$attributes['category_id']];
-////            unset($attributes['category_id']);
-//
-//            dd($attributes);
+////            dd($attributes);
 //
 //
-//            // Rename attributes
 //
-//
+//            $part->setRawAttributes($attributes, true);
+//            return $part;
 //        });
-
-    }
-
-    public function getList($attribute)
-    {
-        $className = '\App\Models\\' . ucfirst($attribute);
-        $attributesRaw = $className::all()->toArray();
-
-//        dd($conditionsRaw);
-
-        $attributesList = [];
-        foreach ($attributesRaw as $attributeRaw) {
-            $attributesList[$attributeRaw['id']] = $attributeRaw['name'];
-        }
-
-
-        return $attributesList;
-    }
-
-//    public function getCategoryList()
-//    {
-//        $categoriesRaw = Category::all()->toArray();
+//dd($suppliersParts);
 //
+//        return $suppliersParts;
 //
-//        $categoryList = [];
-//        foreach ($categoriesRaw as $categoryRaw) {
-//
-//            $categoryList[$categoryRaw['id']] = $categoryRaw['name'];
-//        }
-//
-//        return $categoryList;
 //    }
 
+//    public function getList($attribute)
+//    {
+//        $className = '\App\Models\\' . ucfirst($attribute);
+//        $attributesRaw = $className::all()->toArray();
+//
+//        $attributesList = [];
+//        foreach ($attributesRaw as $attributeRaw) {
+//            $attributesList[$attributeRaw['id']] = $attributeRaw['name'];
+//        }
+//
+//        return $attributesList;
+//    }
 
     // Relationships
     public function supplier()

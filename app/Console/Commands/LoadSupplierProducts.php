@@ -33,7 +33,7 @@ class LoadSupplierProducts extends Command
             'app' . DIRECTORY_SEPARATOR .
             'file_parsing' . DIRECTORY_SEPARATOR .
             'input_files' . DIRECTORY_SEPARATOR .
-            'suppliers_test.csv'
+            'suppliers.csv'
         );
 
         // We ask the user to choose between default and custom path
