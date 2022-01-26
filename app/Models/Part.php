@@ -18,20 +18,24 @@ class Part extends Model
 
     public function getPartsForCsvDownloadFile($supplierId)
     {
-        $suppliersParts = Part::where('supplier_id', $supplierId)->get();
+        // # Get supplier parts (collection) from DB
+        $suppliersPartsRaw = Part::where('supplier_id', $supplierId)->get();
 
+        // # Define which attributes are to be: removed, renamed+values changed
         $attributesToRemove = ['id', 'supplier_id'];
 
-        $conditionsList = $this->getConditionsIdAndText();
-
-        $categoriesList = $this->getCategoriesIdAndText();
-
-        $attributesToRenameAndConvertValues = [
+        $attributesToRenameAndChangeValues = [ // Works if attributes base model has: "id" & "name" attributes
             'condition_id' => 'condition',
             'category_id' => 'category'
         ];
 
-        $suppliersParts->transform(function (Part $part, $key) use ($attributesToRemove, $attributesToRenameAndConvertValues, $conditionsList, $categoriesList) {
+        // Create usable list of attributes to be changed
+        $attributesToRenameList = [];
+        foreach ($attributesToRenameAndChangeValues as $attribute) {
+            $attributesToRenameList[$attribute] = $this->getList($attribute);
+        }
+
+        $suppliersPartsRaw->transform(function (Part $part, $key) use ($attributesToRemove, $attributesToRenameAndChangeValues, $attributesToRenameList) {
             $attributes = $part->getAttributes();
 
             // Remove unwanted attributes
@@ -39,16 +43,10 @@ class Part extends Model
 //            dd($attributes);
 
             // Insert new fields with textual values and remove old
-            foreach ($attributesToRenameAndConvertValues as $key => $value) {
-                $attributes[$value] = $conditionsList[$attributes[$key]];
+            foreach ($attributesToRenameAndChangeValues as $key => $value) {
+                $attributes[$value] = $attributesToRenameList[$value][$attributes[$key]];
                 unset($attributes[$key]);
             }
-
-//            $attributes['condition'] = $conditionsList[$attributes['condition_id']];
-//            unset($attributes['condition_id']);
-//
-//            $attributes['category'] = $categoriesList[$attributes['category_id']];
-//            unset($attributes['category_id']);
 
             dd($attributes);
 
@@ -58,33 +56,65 @@ class Part extends Model
 
         });
 
+
+//        $suppliersParts->transform(function (Part $part, $key) use ($attributesToRemove, $attributesToRenameAndConvertValues, $conditionList, $categoryList) {
+//            $attributes = $part->getAttributes();
+//
+//            // Remove unwanted attributes
+//            $attributes = array_diff_key($attributes, array_flip($attributesToRemove));
+////            dd($attributes);
+//
+//            // Insert new fields with textual values and remove old
+//            foreach ($attributesToRenameAndConvertValues as $key => $value) {
+//                $attributes[$value] = $conditionList[$attributes[$key]];
+//                unset($attributes[$key]);
+//            }
+//
+////            $attributes['condition'] = $conditionList[$attributes['condition_id']];
+////            unset($attributes['condition_id']);
+////
+////            $attributes['category'] = $categoryList[$attributes['category_id']];
+////            unset($attributes['category_id']);
+//
+//            dd($attributes);
+//
+//
+//            // Rename attributes
+//
+//
+//        });
+
     }
 
-    public function getConditionsIdAndText()
+    public function getList($attribute)
     {
-        $conditionsRaw = Condition::all()->toArray();
+        $className = '\App\Models\\' . ucfirst($attribute);
+        $attributesRaw = $className::all()->toArray();
 
-        $conditionsList = [];
-        foreach ($conditionsRaw as $conditionRaw) {
-            $conditionsList[$conditionRaw['id']] = $conditionRaw['name'];
+//        dd($conditionsRaw);
+
+        $attributesList = [];
+        foreach ($attributesRaw as $attributeRaw) {
+            $attributesList[$attributeRaw['id']] = $attributeRaw['name'];
         }
 
-        return $conditionsList;
+
+        return $attributesList;
     }
 
-    public function getCategoriesIdAndText()
-    {
-        $categoriesRaw = Category::all()->toArray();
-
-
-        $categoriesList = [];
-        foreach ($categoriesRaw as $categoryRaw) {
-
-            $categoriesList[$categoryRaw['id']] = $categoryRaw['name'];
-        }
-
-        return $categoriesList;
-    }
+//    public function getCategoryList()
+//    {
+//        $categoriesRaw = Category::all()->toArray();
+//
+//
+//        $categoryList = [];
+//        foreach ($categoriesRaw as $categoryRaw) {
+//
+//            $categoryList[$categoryRaw['id']] = $categoryRaw['name'];
+//        }
+//
+//        return $categoryList;
+//    }
 
 
     // Relationships
