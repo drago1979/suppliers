@@ -20,7 +20,7 @@ class PartController extends Controller
          *           VARIJANTA 1:
          *
          * - Zadovoljava zahtev dobijen u zadatku
-         * - URL query format: ?supplier_id=1
+         * - URI query format: ?supplier_id=1
          * - Ograniceno na jednog supplier-a
         */
 
@@ -37,7 +37,7 @@ class PartController extends Controller
          *           VARIJANTA 2:
          *
          * - Zadovoljava zahtev dobijen u zadatku
-         * - URL query format: ?supplier_id[]=1 (&supplier_id[]=2 .... itd)
+         * - URI query format: ?supplier_id[]=1 (&supplier_id[]=2 .... itd)
          * - Omogucava filtriranje po vise supplier-a
          * - Omogucava uvodjenje dodatnih filtera izmenom
          *   koda u Part\scopeFilterSupplierId()

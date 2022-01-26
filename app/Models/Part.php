@@ -16,6 +16,76 @@ class Part extends Model
         'quantity', 'price'
     ];
 
+    public function getPartsForCsvDownloadFile($supplierId)
+    {
+        $suppliersParts = Part::where('supplier_id', $supplierId)->get();
+
+        $attributesToRemove = ['id', 'supplier_id'];
+
+        $conditionsList = $this->getConditionsIdAndText();
+
+        $categoriesList = $this->getCategoriesIdAndText();
+
+        $attributesToRenameAndConvertValues = [
+            'condition_id' => 'condition',
+            'category_id' => 'category'
+        ];
+
+        $suppliersParts->transform(function (Part $part, $key) use ($attributesToRemove, $attributesToRenameAndConvertValues, $conditionsList, $categoriesList) {
+            $attributes = $part->getAttributes();
+
+            // Remove unwanted attributes
+            $attributes = array_diff_key($attributes, array_flip($attributesToRemove));
+//            dd($attributes);
+
+            // Insert new fields with textual values and remove old
+            foreach ($attributesToRenameAndConvertValues as $key => $value) {
+                $attributes[$value] = $conditionsList[$attributes[$key]];
+                unset($attributes[$key]);
+            }
+
+//            $attributes['condition'] = $conditionsList[$attributes['condition_id']];
+//            unset($attributes['condition_id']);
+//
+//            $attributes['category'] = $categoriesList[$attributes['category_id']];
+//            unset($attributes['category_id']);
+
+            dd($attributes);
+
+
+            // Rename attributes
+
+
+        });
+
+    }
+
+    public function getConditionsIdAndText()
+    {
+        $conditionsRaw = Condition::all()->toArray();
+
+        $conditionsList = [];
+        foreach ($conditionsRaw as $conditionRaw) {
+            $conditionsList[$conditionRaw['id']] = $conditionRaw['name'];
+        }
+
+        return $conditionsList;
+    }
+
+    public function getCategoriesIdAndText()
+    {
+        $categoriesRaw = Category::all()->toArray();
+
+
+        $categoriesList = [];
+        foreach ($categoriesRaw as $categoryRaw) {
+
+            $categoriesList[$categoryRaw['id']] = $categoryRaw['name'];
+        }
+
+        return $categoriesList;
+    }
+
 
     // Relationships
     public function supplier()
@@ -36,8 +106,10 @@ class Part extends Model
     // Filters
     public function scopeFilterSupplierId(Builder $query, $supplier_id)
     {
-        if(!empty($supplier_id)) {
+        if (!empty($supplier_id)) {
             $query->whereIn('parts.supplier_id', $supplier_id);
         }
     }
+
+
 }
