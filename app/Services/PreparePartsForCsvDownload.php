@@ -4,7 +4,6 @@
 | PreparePartsForCsvDownload:
 |--------------------------------------------------------------------------
 | This class:
-| - Retrieves parts for single supplier from DB
 | - Creates directory and file path
 | - Deletes a file with the same name if exists
 | - Creates & stores CSV file
