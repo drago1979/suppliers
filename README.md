@@ -16,7 +16,7 @@ API, RESTful, endpoints, csv -> DB, csv download <-DB.
 
 1. Pull in the project using the following link:
 ```
-https://github.com/drago1979/contacts.git
+https://github.com/drago1979/suppliers.git
 
 ```
 2. Create .env file with valid data (DB credentials etc.).  
