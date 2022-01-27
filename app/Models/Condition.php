@@ -11,8 +11,9 @@ class Condition extends Model
 
     protected $fillable = ['name'];
 
-
-    // Relationships
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function parts()
     {
         return $this->hasMany(Part::class);

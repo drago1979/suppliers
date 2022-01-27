@@ -17,22 +17,37 @@ class Part extends Model
     ];
 
     // Relationships
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function condition()
     {
         return $this->belongsTo(Condition::class);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
     // Filters
+
+    /**
+     * @param Builder $query
+     * @param $supplier_id
+     */
     public function scopeFilterSupplierId(Builder $query, $supplier_id)
     {
         if (!empty($supplier_id)) {

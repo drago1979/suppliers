@@ -10,6 +10,9 @@ use App\Models\Supplier;
 
 class ProductsLoader
 {
+    /**
+     * @param $products
+     */
     public function store($products)
     {
         // Persist data to DB

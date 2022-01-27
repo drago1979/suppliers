@@ -22,6 +22,10 @@ class SupplierController extends Controller
         return new SupplierResourceCollection($suppliers);
     }
 
+    /**
+     * @param Supplier $supplier
+     * @return SupplierResource
+     */
     public function update(Supplier $supplier)
     {
         $supplier->update([
@@ -31,6 +35,10 @@ class SupplierController extends Controller
         return new SupplierResource($supplier->fresh());
     }
 
+    /**
+     * @param Supplier $supplier
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(Supplier $supplier)
     {
         $supplierName = $supplier->name;

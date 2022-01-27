@@ -4,8 +4,9 @@
 | PreparePartsForCsvDownload:
 |--------------------------------------------------------------------------
 | This class:
-| - Retrieves single supplier parts from DB
+| - Retrieves parts for single supplier from DB
 | - Creates directory and file path
+| - Deletes a file with the same name if exists
 | - Creates & stores CSV file
 |
 */
@@ -20,10 +21,68 @@ use Illuminate\Support\Facades\File;
 
 class PreparePartsForCsvDownload
 {
-    public function createCsvFile($supplierId)
+    /**
+     * @param $supplierId
+     * @return string
+     */
+    public function prepare($supplierId)
     {
-        $filePath = $this->createDirectoryAndFilePath($supplierId);
+        $fileName = $this->createFileName($supplierId);
 
+        $filePath = $this->createDirectoryAndFilePath($fileName);
+
+        $this->createCsvFile($filePath, $supplierId);
+
+        return $filePath;
+    }
+
+    /**
+     * @param $supplierId
+     * @return string
+     */
+    public function createFileName($supplierId)
+    {
+        // Get suppliers` name; replace non characters with underscores
+        $supplierName = preg_replace('/[^a-zA-Z0-9]+/', '_', Supplier::find($supplierId)->name);
+
+        $timeStamp = Carbon::now()->format('Y_m_d-H_i');
+
+        return $supplierName . '_' . $timeStamp . '.csv';
+    }
+
+    /**
+     * @param $fileName
+     * @return string
+     */
+    public function createDirectoryAndFilePath($fileName)
+    {
+        // Create Directory Path & File Path
+        $directoryPath = storage_path(
+            'app' . DIRECTORY_SEPARATOR .
+            'file_parsing' . DIRECTORY_SEPARATOR .
+            'download_files'
+        );
+        $filePath = $directoryPath . DIRECTORY_SEPARATOR . $fileName;
+
+        // If there is a file with the same name - delete it
+        if (file_exists($filePath)) {
+            File::delete($filePath);
+        }
+
+        // Create a folder if it does not exist
+        if (!file_exists($directoryPath)) {
+            File::makeDirectory($directoryPath, 0766, true);
+        }
+
+        return $filePath;
+    }
+
+    /**
+     * @param $filePath
+     * @param $supplierId
+     */
+    public function createCsvFile($filePath, $supplierId)
+    {
         $handle = fopen($filePath, 'w');
 
         // Create column names list & write them to CSV file
@@ -55,43 +114,5 @@ class PreparePartsForCsvDownload
             });
 
         fclose($handle);
-
-        return $filePath;
     }
-
-    public function createDirectoryAndFilePath($supplierId)
-    {
-        $fileName = $this->createFileName($supplierId);
-
-        // Create Directory Path & File Path
-        $directoryPath = storage_path(
-            'app' . DIRECTORY_SEPARATOR .
-            'file_parsing' . DIRECTORY_SEPARATOR .
-            'download_files'
-        );
-        $filePath = $directoryPath . DIRECTORY_SEPARATOR . $fileName;
-
-        // If there is a file with the same name - delete it
-        if (file_exists($filePath)) {
-            File::delete($filePath);
-        }
-
-        // Create a folder if it does not exist
-        if (!file_exists($directoryPath)) {
-            File::makeDirectory($directoryPath, 0766, true);
-        }
-
-        return $filePath;
-    }
-
-    public function createFileName($supplierId)
-    {
-        // Get suppliers` name; replace non characters with underscores
-        $supplierName = preg_replace('/[^a-zA-Z0-9]+/', '_', Supplier::find($supplierId)->name);
-
-        $timeStamp = Carbon::now()->format('Y_m_d-H_i_s');
-
-        return $supplierName . '_' . $timeStamp . '.csv';
-    }
-
 }

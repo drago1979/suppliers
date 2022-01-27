@@ -19,6 +19,10 @@ namespace App\Services;
 class CsvFileParser
 {
 
+    /**
+     * @param $csvContent
+     * @return array
+     */
     public function parse($csvContent)
     {
         $products = [];
@@ -38,7 +42,13 @@ class CsvFileParser
         return $products;
     }
 
-    // Add names (keys) to suppliers` and products` attributes
+    /**
+     * Add names (keys) to suppliers` and products` attributes
+     *
+     * @param $columnNames
+     * @param $productsWithoutNames
+     * @return array
+     */
     public function addNamesToFields($columnNames, $productsWithoutNames)
     {
         $products = [];
@@ -58,7 +68,12 @@ class CsvFileParser
         return $products;
     }
 
-    // Remove the product without: supplier_name & part_number & condition
+    /**
+     * Remove products without: supplier_name & part_number & condition
+     *
+     * @param $productsToCheck
+     * @return array
+     */
     public function removeInvalidProducts($productsToCheck)
     {
         foreach ($productsToCheck as $key => $productToCheck) {
@@ -72,7 +87,13 @@ class CsvFileParser
         return $products;
     }
 
-    // DB doesn`t take empty string ("") for float data type; We change it to NULL
+    /**
+     * DB doesn`t take empty string ("") for float data type;
+     * We change it to NULL
+     *
+     * @param $productsToHarmonize
+     * @return array
+     */
     public function harmonizeValueTypes($productsToHarmonize)
     {
         $products = [];

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\PreparePartsForCsvDownload;
-use Illuminate\Support\Facades\File;
 
 class DownloadCsvController extends Controller
 {
@@ -14,7 +13,7 @@ class DownloadCsvController extends Controller
      */
     public function download($supplierId)
     {
-        $filePath = (new PreparePartsForCsvDownload())->createCsvFile($supplierId);
+        $filePath = (new PreparePartsForCsvDownload())->prepare($supplierId);
 
         return response()->download($filePath)->deleteFileAfterSend();
     }

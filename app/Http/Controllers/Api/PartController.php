@@ -12,45 +12,47 @@ class PartController extends Controller
 {
     use ApiResponseTrait;
 
+
     /**
+     *  VARIJANTA:
+     * - Zadovoljava zahtev dobijen u zadatku
+     * - URI query format: ?supplier_id[]=1 (&supplier_id[]=2 .... itd)
+     * - Omogucava filtriranje po vise supplier-a
+     * - Omogucava uvodjenje dodatnih filtera izmenom
+     *   koda u Part\scopeFilterSupplierId()
+     * - Zahteva dodatni kod na modelu
+     *
      * @return PartResourceCollection
      */
     public function index()
     {
-        /*
-         * #########             #########
-         *           VARIJANTA 1:
-         *
-         * - Zadovoljava zahtev dobijen u zadatku
-         * - URI query format: ?supplier_id=1
-         * - Ograniceno na jednog supplier-a
-        */
-
-                //        $supplierId = request()->input('supplier_id');
-                //
-                //        if(!empty($supplierId)){
-                //            $parts = Part::where('supplier_id', $supplierId)->get();
-                //        } else {
-                //            $parts = Part::all();
-                //        }
-
-        /*
-         * #########             #########
-         *           VARIJANTA 2:
-         *
-         * - Zadovoljava zahtev dobijen u zadatku
-         * - URI query format: ?supplier_id[]=1 (&supplier_id[]=2 .... itd)
-         * - Omogucava filtriranje po vise supplier-a
-         * - Omogucava uvodjenje dodatnih filtera izmenom
-         *   koda u Part\scopeFilterSupplierId()
-         *
-        */
         $parts = Part::filterSupplierId(request()->input('supplier_id'))
             ->get();
+
+        /* ------------------------------------------------------------------------ *
+         *           VARIJANTA:                                                     *
+         *                                                                          *
+         *                                                                          *
+         * - URI query format: ?supplier_id=1                                       *
+         * - Ograniceno na jednog supplier-a                                        *
+        */
+
+        //        $supplierId = request()->input('supplier_id');
+        //
+        //        if(!empty($supplierId)){
+        //            $parts = Part::where('supplier_id', $supplierId)->get();
+        //        } else {
+        //            $parts = Part::all();
+        //        }
+        // ------------------------------------------------------------------------ *
 
         return new PartResourceCollection($parts);
     }
 
+    /**
+     * @param Part $part
+     * @return PartResource
+     */
     public function update(Part $part)
     {
         $part->update([
@@ -67,6 +69,10 @@ class PartController extends Controller
         return new PartResource($part->fresh());
     }
 
+    /**
+     * @param Part $part
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(Part $part)
     {
         $partNumber = $part->part_number;
