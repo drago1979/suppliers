@@ -9,7 +9,6 @@
 | - Adds column names to values
 | - Removes invalid rows
 | - Harmonizes value types
-| - Calls the class which stores products & suppliers to DB
 |
 */
 

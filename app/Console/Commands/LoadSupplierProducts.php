@@ -6,6 +6,7 @@
 | This class:
 | - contains default path for the CSV file &
 | - calls the FileParser
+| - Calls the class which stores products & suppliers to DB
 |
 */
 
