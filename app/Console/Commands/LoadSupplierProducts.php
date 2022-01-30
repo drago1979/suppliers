@@ -36,7 +36,6 @@ class LoadSupplierProducts extends Command
             'suppliers.csv'
         );
 
-
         // We ask the user to choose between default and custom path
         if ($this->confirm("### Do you want to use default path for input file ?\n\n ### Default path is:\n" . $filePath, true)) {
             $this->info("\n### You chose default path.\n");
@@ -54,8 +53,9 @@ class LoadSupplierProducts extends Command
             return;
         }
 
-        // If path accessible, parse & load content & inform the user;
+        // If path accessible, parse & load content, inform the user & close the file;
         $products = $fileParser->parse($csvContent);
+        fclose($csvContent);
 
         $productsLoader->store($products);
 

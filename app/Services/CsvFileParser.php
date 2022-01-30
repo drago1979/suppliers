@@ -17,6 +17,7 @@ namespace App\Services;
 
 class CsvFileParser
 {
+    protected $products = [];
 
     /**
      * @param $csvContent
@@ -24,89 +25,75 @@ class CsvFileParser
      */
     public function parse($csvContent)
     {
-        $products = [];
+        $this->getContentFromCsv($csvContent)
+            ->addNamesToFields()
+            ->removeInvalidProducts()
+            ->harmonizeValueTypes();
 
-        while (($csvLine = fgetcsv($csvContent, 250, ",")) !== FALSE) {
-            $products[] = $csvLine;
-        }
-
-        $columnNames = array_shift($products);
-
-        fclose($csvContent);
-
-        $products = $this->addNamesToFields($columnNames, $products);
-        $products = $this->removeInvalidProducts($products);
-        $products = $this->harmonizeValueTypes($products);
-
-        return $products;
+        return $this->products;
     }
 
     /**
-     * Add names (keys) to suppliers` and products` attributes
-     *
-     * @param $columnNames
-     * @param $productsWithoutNames
-     * @return array
+     * @param $csvContent
+     * @return $this
      */
-    public function addNamesToFields($columnNames, $productsWithoutNames)
+    protected function getContentFromCsv($csvContent)
     {
-        $products = [];
+        while (($csvLine = fgetcsv($csvContent, 250, ",")) !== FALSE) {
+            $this->products[] = $csvLine;
+        }
 
-        foreach ($productsWithoutNames as $productWithoutNames) {
-            $product = [];
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function addNamesToFields()
+    {
+        $columnNames = array_shift($this->products);
+
+        foreach ($this->products as &$productWithoutNames) {
 
             foreach ($productWithoutNames as $index => $productAttribute) {
                 $columnName = $columnNames[$index];
 
-                $product[$columnName] = $productAttribute;
+                $productWithoutNames[$columnName] = $productAttribute;
+                unset($productWithoutNames[$index]);
             }
-
-            $products[] = $product;
         }
 
-        return $products;
+        return $this;
     }
+
 
     /**
-     * Remove products without: supplier_name & part_number & condition
-     *
-     * @param $productsToCheck
-     * @return array
+     * @return $this
      */
-    public function removeInvalidProducts($productsToCheck)
+    protected function removeInvalidProducts()
     {
-        foreach ($productsToCheck as $key => $productToCheck) {
+        foreach ($this->products as $key => $productToCheck) {
             if ($productToCheck['supplier_name'] === "" || $productToCheck['part_number'] === "" || $productToCheck['condition'] === "") {
-                unset($productsToCheck[$key]);
+                unset($this->products[$key]);
             }
         }
 
-        $products = array_values($productsToCheck);
+        array_values($this->products);
 
-        return $products;
+        return $this;
     }
+
 
     /**
      * DB doesn`t take empty string ("") for float data type;
      * We change it to NULL
-     *
-     * @param $productsToHarmonize
-     * @return array
      */
-    public function harmonizeValueTypes($productsToHarmonize)
+    protected function harmonizeValueTypes()
     {
-        $products = [];
-
-        foreach ($productsToHarmonize as $productToHarmonize) {
-            $product = $productToHarmonize;
-
-            if ($product['price'] === "") {
-                $product['price'] = null;
+        foreach ($this->products as &$productToHarmonize) {
+            if ($productToHarmonize['price'] === "") {
+                $productToHarmonize['price'] = null;
             }
-
-            $products[] = $product;
         }
-
-        return $products;
     }
 }
