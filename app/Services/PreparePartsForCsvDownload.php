@@ -20,40 +20,47 @@ use Illuminate\Support\Facades\File;
 
 class PreparePartsForCsvDownload
 {
+    protected $supplierId;
+    protected $fileName;
+    protected $filePath;
+
+
     /**
      * @param $supplierId
-     * @return string
+     * @return mixed
      */
     public function prepare($supplierId)
     {
-        $fileName = $this->createFileName($supplierId);
+        $this->supplierId = $supplierId;
 
-        $filePath = $this->createDirectoryAndFilePath($fileName);
+        $this->createFileName()
+        ->createDirectoryAndFilePath()
+        ->createCsvFile();
 
-        $this->createCsvFile($filePath, $supplierId);
-
-        return $filePath;
+        return $this->filePath;
     }
 
+
     /**
-     * @param $supplierId
-     * @return string
+     * @return $this
      */
-    public function createFileName($supplierId)
+    protected function createFileName()
     {
         // Get suppliers` name; replace non characters with underscores
-        $supplierName = preg_replace('/[^a-zA-Z0-9]+/', '_', Supplier::find($supplierId)->name);
+        $supplierName = preg_replace('/[^a-zA-Z0-9]+/', '_', Supplier::find($this->supplierId)->name);
 
         $timeStamp = Carbon::now()->format('Y_m_d-H_i');
 
-        return $supplierName . '_' . $timeStamp . '.csv';
+        $this->fileName = $supplierName . '_' . $timeStamp . '.csv';
+
+        return $this;
     }
 
+
     /**
-     * @param $fileName
-     * @return string
+     * @return $this
      */
-    public function createDirectoryAndFilePath($fileName)
+    protected function createDirectoryAndFilePath()
     {
         // Create Directory Path & File Path
         $directoryPath = storage_path(
@@ -61,11 +68,11 @@ class PreparePartsForCsvDownload
             'file_parsing' . DIRECTORY_SEPARATOR .
             'download_files'
         );
-        $filePath = $directoryPath . DIRECTORY_SEPARATOR . $fileName;
+        $this->filePath = $directoryPath . DIRECTORY_SEPARATOR . $this->fileName;
 
         // If there is a file with the same name - delete it
-        if (file_exists($filePath)) {
-            File::delete($filePath);
+        if (file_exists($this->filePath)) {
+            File::delete($this->filePath);
         }
 
         // Create a folder if it does not exist
@@ -73,16 +80,16 @@ class PreparePartsForCsvDownload
             File::makeDirectory($directoryPath, 0766, true);
         }
 
-        return $filePath;
+        return $this;
     }
 
+
     /**
-     * @param $filePath
-     * @param $supplierId
+     *
      */
-    public function createCsvFile($filePath, $supplierId)
+    protected function createCsvFile()
     {
-        $handle = fopen($filePath, 'w');
+        $handle = fopen($this->filePath, 'w');
 
         // Create column names list & write them to CSV file
         $columnNames = ['supplier_name', 'part_number', 'part_description', 'quantity', 'price', 'condition', 'category'];
@@ -99,9 +106,9 @@ class PreparePartsForCsvDownload
                 'conditions.name AS condition',
                 'categories.name AS category',
             ])
-            ->join('suppliers', function ($query) use ($supplierId) {
+            ->join('suppliers', function ($query) {
                 $query->on('parts.supplier_id', '=', 'suppliers.id')
-                    ->on('suppliers.id', '=', DB::raw($supplierId));
+                    ->on('suppliers.id', '=', DB::raw($this->supplierId));
             })
             ->join('conditions', 'parts.condition_id', '=', 'conditions.id')
             ->leftJoin('categories', 'parts.category_id', '=', 'categories.id')
