@@ -2,9 +2,10 @@
 
 ## About the app
 Tiny demo app.  
-API, RESTful, endpoints, csv -> DB, csv download <-DB.  
-- Suppliers (index, update, delete).  
-- Products (index, update, delete, filter by supplier, load CSV, download CSV w/ suppliers).  
+User registration, authentication, two types of users (admin/member), admin can upload resources (books) file (csv, xml, xls, xlsx); API endpoints with Laravel Sanctum API tokens, view all resources with filtering, view single resource.  
+- Books.  
+- Authors.  
+- Publishers.  
 
 
 ## Version requirements
